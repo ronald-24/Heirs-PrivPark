@@ -30,24 +30,7 @@ def verify_token(Authorization: str | None = Header(default=None), db: Session =
     )
 
 
-@router.post("/login", response_model=UserOut)
-def login(Authorization: str | None = Header(default=None), db: Session = Depends(get_db)):
-    """
-    Login via Firebase token (équivalent à verify-token mais avec un nom plus explicite)
-    L'authentification réelle se fait côté Flutter avec Firebase Auth
-    """
-    user, claims = verify_bearer_token_and_get_user(
-        authorization=Authorization, db=db)
-    return user
 
-
-@router.post("/logout")
-def logout():
-    """
-    Logout côté backend (principalement pour la documentation)
-    La déconnexion réelle se fait côté Flutter avec Firebase Auth
-    """
-    return {"message": "Logout réussi", "note": "Veuillez vous déconnecter depuis l'application mobile"}
 
 
 @router.get("/me", response_model=UserOut)

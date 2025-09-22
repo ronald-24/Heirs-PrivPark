@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "260154244797",
+    "project_id": "heirs-privpark",
+    "storage_bucket": "heirs-privpark.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:260154244797:android:d049a3051a384390d2c1d4",
+        "android_client_info": {
+          "package_name": "com.heirsprivpark.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAWNXKeCvJwdDOzAth0Z6hYwidv_5N02Kw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

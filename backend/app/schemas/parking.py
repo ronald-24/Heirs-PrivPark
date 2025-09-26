@@ -41,3 +41,25 @@ class ParkingSpaceOut(ParkingSpaceBase):
 
     class Config:
         from_attributes = True
+
+
+class ParkingSearchResult(BaseModel):
+    id: int
+    title: str
+    address: str | None = None
+    latitude: float
+    longitude: float
+    price_per_hour: float | None = None
+    distance_m: float
+
+
+class ParkingSearchQuery(BaseModel):
+    lat: float
+    lng: float
+    radius_m: float = Field(3000, ge=100, le=20000)
+    start_time: datetime | None = None
+    end_time: datetime | None = None
+    max_price: float | None = None
+    sort: str = Field("distance", pattern="^(distance|price)$")
+    limit: int = Field(50, ge=1, le=100)
+    offset: int = Field(0, ge=0)

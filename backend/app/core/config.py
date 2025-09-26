@@ -9,15 +9,16 @@ from dotenv import load_dotenv
 load_dotenv()  # Chargement du fichier .env
 
 firebaseConfig = {
-  "apiKey": "AIzaSyCzIVVnmyYerQxNtpDAXHYGInMTsOrPEF4",
-  "authDomain": "heirsprivpark.firebaseapp.com",
-  "projectId": "heirsprivpark",
-  "storageBucket": "heirsprivpark.firebasestorage.app",
-  "messagingSenderId": "788141115039",
-  "appId": "1:788141115039:web:4709d890fa30b54d1ec4aa",
-  "measurementId": "G-6EW6TF2SMC",
-  "databaseURL": "postgresql+psycopg://postgres:123456789@localhost:5432/privpark"
+    "apiKey": "AIzaSyCzIVVnmyYerQxNtpDAXHYGInMTsOrPEF4",
+    "authDomain": "heirsprivpark.firebaseapp.com",
+    "projectId": "heirsprivpark",
+    "storageBucket": "heirsprivpark.firebasestorage.app",
+    "messagingSenderId": "788141115039",
+    "appId": "1:788141115039:web:4709d890fa30b54d1ec4aa",
+    "measurementId": "G-6EW6TF2SMC",
+    "databaseURL": "postgresql+psycopg://postgres:123456789@localhost:5432/privpark"
 }
+
 
 def _parse_cors(origins_raw: str | None) -> List[str]:
     if not origins_raw or origins_raw.strip() == "*":
@@ -37,9 +38,15 @@ class Settings(BaseSettings):
         "postgresql+psycopg://postgres:postgres@localhost:5432/privpark",
     )
     firebase_project_id: str | None = os.getenv("FIREBASE_PROJECT_ID")
-    firebase_credentials_path: str | None = os.getenv("FIREBASE_CREDENTIALS_PATH")
+    firebase_credentials_path: str | None = os.getenv(
+        "FIREBASE_CREDENTIALS_PATH")
     firebase_config: dict = os.getenv("FIREBASE_CONFIG", firebaseConfig)
     cors_origins: str = os.getenv("CORS_ORIGINS", "*")
+    # AWS S3
+    aws_s3_bucket: str | None = os.getenv("AWS_S3_BUCKET")
+    aws_s3_region: str | None = os.getenv("AWS_S3_REGION")
+    aws_access_key_id: str | None = os.getenv("AWS_ACCESS_KEY_ID")
+    aws_secret_access_key: str | None = os.getenv("AWS_SECRET_ACCESS_KEY")
 
     class Config:
         env_file = "backend/.env"

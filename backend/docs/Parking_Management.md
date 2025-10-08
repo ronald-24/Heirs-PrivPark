@@ -24,7 +24,7 @@ The API uses these main request/response shapes (Pydantic model names shown):
 
 - AvailabilityCreate
 
-  - Fields: `start` , `end` 
+  - Fields: `start` , `end`
 
 - AvailabilityOut
 
@@ -46,6 +46,15 @@ The API uses these main request/response shapes (Pydantic model names shown):
   - Fields: `id` (int), `owner_id` (int), all fields from ParkingSpaceCreate, `availabilities` (array of AvailabilityOut | null)
 
 Note: Internally the project stores `photos` as a comma-separated string in the database. The public API contract uses a list of strings for `photos`. The router code converts between those representations when creating/updating parking spaces and when appending uploaded photos.
+
+## Booking & Payments (overview)
+
+- `POST /bookings` — create a booking (requires availability). Body: `parking_space_id`, `start_time`, `end_time`. Returns booking with computed `total_amount`.
+- `GET /bookings` — list current user's bookings.
+- `GET /bookings/{id}` — get a specific booking (owner only).
+- `DELETE /bookings/{id}` — cancel a non-confirmed booking.
+- `POST /payments/create-checkout-session` — returns a Stripe Checkout URL for a booking. Body: `booking_id`, `success_url`, `cancel_url`.
+- `POST /payments/webhook` — Stripe webhook endpoint to confirm payment and persist a `Payment` with receipt URL.
 
 ## Endpoints
 

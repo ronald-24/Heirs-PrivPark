@@ -48,6 +48,10 @@ class Settings(BaseSettings):
     aws_access_key_id: str | None = os.getenv("AWS_ACCESS_KEY_ID")
     aws_secret_access_key: str | None = os.getenv("AWS_SECRET_ACCESS_KEY")
 
+    # Stripe
+    stripe_secret_key: str | None = os.getenv("STRIPE_SECRET_KEY")
+    stripe_webhook_secret: str | None = os.getenv("STRIPE_WEBHOOK_SECRET")
+
     class Config:
         env_file = "backend/.env"
         env_file_encoding = "utf-8"

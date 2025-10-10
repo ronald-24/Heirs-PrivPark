@@ -253,3 +253,19 @@ user = upsert_from_claims(
 - Le backend **vérifie le token**, upsert l’utilisateur et renvoie le profil.
 - Déconnexion : **uniquement** côté Flutter.
 - Profil courant : `GET /api/auth/me` ou `GET /api/users/me` ; mise à jour via `PUT /api/users/me`.
+
+---
+
+## 10. Rôles & Permissions
+
+- `user`: accès normal à l'application
+- `admin`: accès au back office (panel admin)
+
+### Accès Admin
+
+Les routes admin sont préfixées par `/admin` et nécessitent `role == "admin"`.
+
+- `GET /admin/users` — liste des utilisateurs
+- `PUT /admin/users/{user_id}` — mise à jour du rôle / statut actif
+- `GET /admin/issue-reports` — liste des signalements de problèmes
+- `PUT /admin/issue-reports/{issue_report_id}` — mise à jour du statut/note admin

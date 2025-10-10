@@ -91,13 +91,20 @@ Note: Internally the project stores `photos` as a comma-separated string in the 
    Notes: Returns parking spaces for the authenticated user (owner_id == current user).
 
 3. Get one parking space
+4. Admin listing moderation
+
+   - Method: PUT
+   - Path: /admin/listings/{parking_id}/status
+   - Auth: Admin required
+   - Body: form/query: `status` in [pending, approved, rejected], optional `is_active`
+   - Response: `ParkingSpaceOut`
 
    - Method: GET
    - Path: /parking/{parking_id}
    - Auth: Required
    - Response: `ParkingSpaceOut` or 404 if the space does not exist or is not owned by the current user.
 
-4. Update parking space
+5. Update parking space
 
    - Method: PUT
    - Path: /parking/{parking_id}
@@ -106,7 +113,7 @@ Note: Internally the project stores `photos` as a comma-separated string in the 
    - Response: `ParkingSpaceOut`
    - Notes: If `photos` is omitted it is left unchanged. If `photos` is provided it replaces the stored photo list (the code accepts an array and stores a CSV internally).
 
-5. Delete parking space
+6. Delete parking space
 
    - Method: DELETE
    - Path: /parking/{parking_id}
@@ -114,7 +121,7 @@ Note: Internally the project stores `photos` as a comma-separated string in the 
    - Response: {"ok": true}
    - Errors: 404 if not found or not owner.
 
-6. Add availability for a parking space
+7. Add availability for a parking space
 
    - Method: POST
    - Path: /parking/{parking_id}/availability
@@ -130,14 +137,14 @@ Note: Internally the project stores `photos` as a comma-separated string in the 
    "end": "2025-10-01T18:00:00+00:00"
    }
 
-7. List availabilities for a space (public read)
+8. List availabilities for a space (public read)
 
    - Method: GET
    - Path: /parking/{parking_id}/availability
    - Auth: Not required (public read allowed)
    - Response: array[`AvailabilityOut`]
 
-8. Delete availability
+9. Delete availability
 
    - Method: DELETE
    - Path: /parking/availability/{availability_id}
@@ -145,21 +152,21 @@ Note: Internally the project stores `photos` as a comma-separated string in the 
    - Response: {"ok": true}
    - Authorization: The user must be the owner of the parking space that the availability belongs to. If not the owner, a 403 Forbidden is returned.
 
-9. Upload a photo for a parking space
+10. Upload a photo for a parking space
 
-   - Method: POST
-   - Path: /parking/{parking_id}/photos
-   - Auth: Required
-   - Content-Type: multipart/form-data
-   - Form field: `file` — the file to upload
-   - Response: {"url": "https://..."}
-   - Behavior: The server uploads the file to S3 (using `app.core.storage.upload_fileobj_to_s3`) and appends the returned URL to the parking space's stored `photos` CSV. Returns the uploaded file URL.
+    - Method: POST
+    - Path: /parking/{parking_id}/photos
+    - Auth: Required
+    - Content-Type: multipart/form-data
+    - Form field: `file` — the file to upload
+    - Response: {"url": "https://..."}
+    - Behavior: The server uploads the file to S3 (using `app.core.storage.upload_fileobj_to_s3`) and appends the returned URL to the parking space's stored `photos` CSV. Returns the uploaded file URL.
 
-   Example response:
+    Example response:
 
-   {
-   "url": "https://s3.amazonaws.com/bucket/parks/abc123.jpg"
-   }
+    {
+    "url": "https://s3.amazonaws.com/bucket/parks/abc123.jpg"
+    }
 
 ## Validation, formats and tips
 

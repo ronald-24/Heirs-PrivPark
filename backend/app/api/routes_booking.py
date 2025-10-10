@@ -14,6 +14,7 @@ from app.db.repositories.booking_repo import (
     cancel_booking,
 )
 from app.schemas.booking import BookingCreate, BookingOut
+from app.services.notification_service import NotificationService
 
 
 router = APIRouter(prefix="/bookings", tags=["bookings"])
@@ -61,6 +62,15 @@ def create_new_booking(
         total_amount=total_amount,
         currency="usd",
     )
+
+    # Créer une notification de confirmation de réservation
+    try:
+        NotificationService.create_booking_confirmation_notification(
+            db, booking, user)
+    except Exception as e:
+        # Log l'erreur mais ne pas faire échouer la création de réservation
+        print(f"Erreur lors de la création de la notification: {e}")
+
     return booking
 
 
@@ -94,4 +104,14 @@ def cancel_my_booking(
     booking = cancel_booking(db, booking_id, user_id=user.id)
     if not booking:
         raise HTTPException(status_code=400, detail="Cannot cancel booking")
+
+    # Créer une notification d'annulation de réservation
+    try:
+        NotificationService.create_booking_cancelled_notification(
+            db, booking, user)
+    except Exception as e:
+        # Log l'erreur mais ne pas faire échouer l'annulation
+        print(
+            f"Erreur lors de la création de la notification d'annulation: {e}")
+
     return booking

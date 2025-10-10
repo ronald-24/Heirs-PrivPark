@@ -15,6 +15,7 @@ from app.db.repositories.booking_repo import (
 )
 from app.db.models import PaymentStatus
 from app.schemas.booking import PaymentCreateSession, CheckoutSessionOut
+from app.services.notification_service import NotificationService
 
 
 router = APIRouter(prefix="/payments", tags=["payments"])
@@ -103,7 +104,7 @@ async def stripe_webhook(request: Request, db: Session = Depends(get_db)):
 
             booking = get_booking(db, booking_id)
             if booking:
-                create_payment(
+                payment = create_payment(
                     db,
                     user_id=booking.user_id,
                     parking_space_id=booking.parking_space_id,
@@ -116,5 +117,14 @@ async def stripe_webhook(request: Request, db: Session = Depends(get_db)):
                     status=PaymentStatus.complet,
                     receipt_url=receipt_url,
                 )
+
+                # Créer une notification de confirmation de paiement
+                try:
+                    NotificationService.create_payment_confirmation_notification(
+                        db, payment, booking.user)
+                except Exception as e:
+                    # Log l'erreur mais ne pas faire échouer le processus de paiement
+                    print(
+                        f"Erreur lors de la création de la notification de paiement: {e}")
 
     return {"received": True}

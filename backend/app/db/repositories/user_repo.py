@@ -34,3 +34,19 @@ def upsert_from_claims(
     db.commit()
     db.refresh(user)
     return user
+
+
+def list_users(db: Session, *, limit: int = 100, offset: int = 0) -> list[User]:
+    q = select(User).limit(limit).offset(offset)
+    return db.execute(q).scalars().all()
+
+
+def admin_update_user(db: Session, *, user: User, role: str | None = None, is_active: bool | None = None) -> User:
+    if role is not None:
+        user.role = role
+    if is_active is not None:
+        user.is_active = is_active
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    return user

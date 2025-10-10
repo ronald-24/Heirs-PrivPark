@@ -4,7 +4,7 @@ from typing import List, Tuple
 from datetime import datetime
 import math
 
-from app.db.models.parking import ParkingSpace, Availability
+from app.db.models.parking import ParkingSpace, Availability, ListingStatus
 
 
 def create_parking_space(db: Session, owner_id: int, *, data: dict) -> ParkingSpace:
@@ -55,6 +55,24 @@ def list_availabilities(db: Session, parking_space_id: int):
 def delete_availability(db: Session, availability: Availability) -> None:
     db.delete(availability)
     db.commit()
+
+
+def admin_set_listing_status(
+    db: Session,
+    parking: ParkingSpace,
+    *,
+    status: ListingStatus | str,
+    is_active: bool | None = None,
+) -> ParkingSpace:
+    if isinstance(status, str):
+        status = ListingStatus(status)
+    parking.status = status
+    if is_active is not None:
+        parking.is_active = is_active
+    db.add(parking)
+    db.commit()
+    db.refresh(parking)
+    return parking
 
 
 def _haversine_distance_m(lat1: float, lon1: float, lat2: float, lon2: float) -> float:

@@ -62,6 +62,7 @@ def create_booking(
         end_time=end_time,
         total_amount=total_amount,
         currency=currency,
+        status=BookingStatus.pending,
     )
     db.add(booking)
     db.commit()

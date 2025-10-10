@@ -1,10 +1,17 @@
 from __future__ import annotations
 
-from sqlalchemy import String, Float, Text, ForeignKey, DateTime
+from sqlalchemy import String, Float, Text, ForeignKey, DateTime, Enum, Boolean
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import datetime, timezone
 
 from app.db.base import Base
+import enum
+
+
+class ListingStatus(str, enum.Enum):
+    pending = "pending"
+    approved = "approved"
+    rejected = "rejected"
 
 
 class ParkingSpace(Base):
@@ -23,6 +30,12 @@ class ParkingSpace(Base):
     longitude: Mapped[float | None] = mapped_column(Float, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+
+    # Moderation fields
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    status: Mapped["ListingStatus"] = mapped_column(
+        Enum(ListingStatus), default=ListingStatus.pending
+    )
 
     owner = relationship("User", backref="parking_spaces")
     availabilities = relationship(

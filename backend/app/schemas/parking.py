@@ -24,6 +24,8 @@ class ParkingSpaceBase(BaseModel):
     address: str | None = None
     latitude: float | None = None
     longitude: float | None = None
+    is_active: bool | None = None
+    status: str | None = None
 
 
 class ParkingSpaceCreate(ParkingSpaceBase):
@@ -37,6 +39,7 @@ class ParkingSpaceUpdate(ParkingSpaceBase):
 class ParkingSpaceOut(ParkingSpaceBase):
     id: int
     owner_id: int
+    created_at: datetime | None = None
     availabilities: List[AvailabilityOut] | None = None
 
     class Config:

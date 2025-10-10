@@ -21,6 +21,8 @@ class BookingOut(BaseModel):
     currency: str
     status: str
     stripe_checkout_session_id: Optional[str] = None
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
 
     class Config:
         from_attributes = True

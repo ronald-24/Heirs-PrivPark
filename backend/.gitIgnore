@@ -15,6 +15,12 @@ local_settings.py
 db.sqlite3
 db.sqlite3-journal
 
+# Alembic
+alembic/__pycache__/
+alembic/*.pyc
+alembic/versions/__pycache__/
+alembic/versions/*.pyc
+
 # Scrapy stuff:
 .scrapy
 

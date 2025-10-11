@@ -1,39 +1,39 @@
 # Admin Panel (Back Office) 🛠️
 
-**Documentation complète du panneau d'administration pour Heirs-PrivPark**
+**Complete documentation of the administration panel for Heirs-PrivPark**
 
-## 📋 Vue d'ensemble
+## 📋 Overview
 
-Le panneau d'administration permet aux administrateurs de gérer efficacement la plateforme de location de parkings privés. Il comprend la gestion des utilisateurs, la modération des annonces et la résolution des signalements de problèmes.
+The administration panel allows administrators to efficiently manage the private parking rental platform. It includes user management, listing moderation, and issue report resolution.
 
-## 🔐 Authentification et autorisation
+## 🔐 Authentication and Authorization
 
-### Prérequis
+### Prerequisites
 
-- **Rôle requis** : `admin` (défini dans le champ `role` de la table `users`)
-- **Authentification** : Token Firebase valide via header `Authorization: Bearer <token>`
-- **Vérification** : Toutes les routes admin utilisent `require_role("admin", user.role)`
+- **Required Role**: `admin` (defined in the `role` field of the `users` table)
+- **Authentication**: Valid Firebase token via `Authorization: Bearer <token>` header
+- **Verification**: All admin routes use `require_role("admin", user.role)`
 
-### Créer un utilisateur admin
+### Create an Admin User
 
 ```sql
--- Via SQL direct
+-- Via direct SQL
 UPDATE users SET role = 'admin' WHERE email = 'admin@example.com';
 
--- Ou via l'API (si vous avez déjà un admin)
+-- Or via API (if you already have an admin)
 PUT /admin/users/{user_id}
 {
   "role": "admin"
 }
 ```
 
-## 👥 Gestion des utilisateurs
+## 👥 User Management
 
-### 1. Lister tous les utilisateurs
+### 1. List All Users
 
-**Endpoint** : `GET /admin/users`
+**Endpoint**: `GET /admin/users`
 
-**Réponse** :
+**Response**:
 
 ```json
 [
@@ -48,32 +48,32 @@ PUT /admin/users/{user_id}
 ]
 ```
 
-**Utilisation** :
+**Usage**:
 
-- Voir tous les utilisateurs inscrits
-- Identifier les comptes inactifs
-- Surveiller l'activité des utilisateurs
+- View all registered users
+- Identify inactive accounts
+- Monitor user activity
 
-### 2. Modifier un utilisateur
+### 2. Modify a User
 
-**Endpoint** : `PUT /admin/users/{user_id}`
+**Endpoint**: `PUT /admin/users/{user_id}`
 
-**Body** :
+**Body**:
 
 ```json
 {
-  "role": "admin", // Optionnel : "user" ou "admin"
-  "is_active": false // Optionnel : true/false
+  "role": "admin", // Optional: "user" or "admin"
+  "is_active": false // Optional: true/false
 }
 ```
 
-**Cas d'usage** :
+**Use Cases**:
 
-- **Promouvoir un utilisateur** : `role: "admin"`
-- **Suspendre un compte** : `is_active: false`
-- **Réactiver un compte** : `is_active: true`
+- **Promote a User**: `role: "admin"`
+- **Suspend an Account**: `is_active: false`
+- **Reactivate an Account**: `is_active: true`
 
-**Exemple** :
+**Example**:
 
 ```bash
 curl -X PUT "http://localhost:8000/admin/users/123" \
@@ -82,60 +82,60 @@ curl -X PUT "http://localhost:8000/admin/users/123" \
   -d '{"role": "admin", "is_active": true}'
 ```
 
-## 🅿️ Modération des annonces
+## 🅿️ Listing Moderation
 
-### 1. Approuver/Rejeter une annonce
+### 1. Approve/Reject a Listing
 
-**Endpoint** : `PUT /admin/listings/{parking_id}/status`
+**Endpoint**: `PUT /admin/listings/{parking_id}/status`
 
-**Paramètres** :
+**Parameters**:
 
-- `status` (requis) : `"pending"`, `"approved"`, `"rejected"`
-- `is_active` (optionnel) : `true`/`false`
+- `status` (required): `"pending"`, `"approved"`, `"rejected"`
+- `is_active` (optional): `true`/`false`
 
-**Exemples** :
+**Examples**:
 
-**Approuver une annonce** :
+**Approve a Listing**:
 
 ```bash
 curl -X PUT "http://localhost:8000/admin/listings/456/status?status=approved" \
   -H "Authorization: Bearer <admin_token>"
 ```
 
-**Rejeter une annonce** :
+**Reject a Listing**:
 
 ```bash
 curl -X PUT "http://localhost:8000/admin/listings/456/status?status=rejected" \
   -H "Authorization: Bearer <admin_token>"
 ```
 
-**Désactiver temporairement** :
+**Temporarily Disable**:
 
 ```bash
 curl -X PUT "http://localhost:8000/admin/listings/456/status?status=approved&is_active=false" \
   -H "Authorization: Bearer <admin_token>"
 ```
 
-### 2. États des annonces
+### 2. Listing States
 
-| État       | Description              | Visibilité |
-| ---------- | ------------------------ | ---------- |
-| `pending`  | En attente de modération | ❌ Masquée |
-| `approved` | Approuvée par l'admin    | ✅ Visible |
-| `rejected` | Rejetée par l'admin      | ❌ Masquée |
+| State      | Description        | Visibility |
+| ---------- | ------------------ | ---------- |
+| `pending`  | Pending moderation | ❌ Hidden  |
+| `approved` | Approved by admin  | ✅ Visible |
+| `rejected` | Rejected by admin  | ❌ Hidden  |
 
-**Logique de filtrage** :
+**Filtering Logic**:
 
-- Seules les annonces avec `status = "approved"` ET `is_active = true` apparaissent dans les recherches
-- Les propriétaires peuvent toujours voir leurs annonces, même rejetées
+- Only listings with `status = "approved"` AND `is_active = true` appear in searches
+- Owners can always see their listings, even rejected ones
 
-## 🚨 Gestion des signalements (Issue Reports)
+## 🚨 Issue Report Management
 
-### 1. Lister tous les signalements
+### 1. List All Issue Reports
 
-**Endpoint** : `GET /admin/issue-reports`
+**Endpoint**: `GET /admin/issue-reports`
 
-**Réponse** :
+**Response**:
 
 ```json
 [
@@ -144,8 +144,8 @@ curl -X PUT "http://localhost:8000/admin/listings/456/status?status=approved&is_
     "created_by_user_id": 123,
     "booking_id": 456,
     "parking_space_id": 789,
-    "subject": "Place de parking en mauvais état",
-    "description": "La place est très étroite et le sol est cassé...",
+    "subject": "Parking space in poor condition",
+    "description": "The space is very narrow and the floor is broken...",
     "status": "open",
     "admin_notes": null,
     "created_at": "2024-01-15T14:30:00Z",
@@ -154,54 +154,54 @@ curl -X PUT "http://localhost:8000/admin/listings/456/status?status=approved&is_
 ]
 ```
 
-### 2. Traiter un signalement
+### 2. Process an Issue Report
 
-**Endpoint** : `PUT /admin/issue-reports/{issue_report_id}`
+**Endpoint**: `PUT /admin/issue-reports/{issue_report_id}`
 
-**Body** :
+**Body**:
 
 ```json
 {
   "status": "resolved", // "open", "in_review", "resolved", "dismissed"
-  "admin_notes": "Remboursement de 50% accordé. Propriétaire contacté pour améliorer la signalisation."
+  "admin_notes": "50% refund granted. Owner contacted to improve signage."
 }
 ```
 
-**États des signalements** :
+**Issue Report States**:
 
-| État        | Description         | Action requise        |
-| ----------- | ------------------- | --------------------- |
-| `open`      | Nouveau signalement | Examiner le problème  |
-| `in_review` | En cours d'examen   | Contacter les parties |
-| `resolved`  | Résolu              | Fermer le dossier     |
-| `dismissed` | Rejeté              | Motiver la décision   |
+| State       | Description      | Required Action      |
+| ----------- | ---------------- | -------------------- |
+| `open`      | New issue report | Examine the problem  |
+| `in_review` | Under review     | Contact parties      |
+| `resolved`  | Resolved         | Close the case       |
+| `dismissed` | Rejected         | Justify the decision |
 
-### 3. Exemples de résolution
+### 3. Resolution Examples
 
-**Signalement résolu avec remboursement** :
+**Issue Resolved with Refund**:
 
 ```json
 {
   "status": "resolved",
-  "admin_notes": "Problème confirmé. Remboursement de 50% accordé (7.50€). Propriétaire averti pour améliorer la qualité."
+  "admin_notes": "Problem confirmed. 50% refund granted (7.50€). Owner warned to improve quality."
 }
 ```
 
-**Signalement rejeté** :
+**Issue Dismissed**:
 
 ```json
 {
   "status": "dismissed",
-  "admin_notes": "Photos vérifiées - l'annonce correspond à la réalité. Aucune action requise."
+  "admin_notes": "Photos verified - listing matches reality. No action required."
 }
 ```
 
-## 📊 Tableau de bord admin
+## 📊 Admin Dashboard
 
-### Métriques clés à surveiller
+### Key Metrics to Monitor
 
 ```python
-# Exemple de requêtes pour le dashboard
+# Example queries for the dashboard
 dashboard_stats = {
     "users": {
         "total": "SELECT COUNT(*) FROM users",
@@ -228,46 +228,46 @@ dashboard_stats = {
 }
 ```
 
-## 🔄 Workflow de modération
+## 🔄 Moderation Workflow
 
-### 1. Nouvelle annonce créée
-
-```
-Propriétaire crée annonce → status: "pending" → Admin reçoit notification → Admin examine → Approuve/Rejette
-```
-
-### 2. Signalement créé
+### 1. New Listing Created
 
 ```
-Utilisateur signale problème → status: "open" → Admin examine → Met en "in_review" → Résout ou Rejette
+Owner creates listing → status: "pending" → Admin receives notification → Admin reviews → Approves/Rejects
 ```
 
-### 3. Actions préventives
+### 2. Issue Report Created
 
-- **Surveillance** : Vérifier régulièrement les annonces en attente
-- **Réactivité** : Traiter les signalements dans les 24h
-- **Communication** : Informer les propriétaires des décisions
+```
+User reports issue → status: "open" → Admin reviews → Sets to "in_review" → Resolves or Dismisses
+```
 
-## 🛡️ Bonnes pratiques de sécurité
+### 3. Preventive Actions
 
-### 1. Vérification des permissions
+- **Monitoring**: Regularly check pending listings
+- **Responsiveness**: Process issue reports within 24h
+- **Communication**: Inform owners of decisions
+
+## 🛡️ Security Best Practices
+
+### 1. Permission Verification
 
 ```python
-# Toujours vérifier le rôle admin
+# Always verify admin role
 user, _ = verify_bearer_token_and_get_user(authorization=Authorization, db=db)
 require_role("admin", user.role)
 ```
 
-### 2. Validation des données
+### 2. Data Validation
 
-- Vérifier l'existence des ressources avant modification
-- Valider les statuts autorisés
-- Logger toutes les actions admin
+- Verify resource existence before modification
+- Validate authorized statuses
+- Log all admin actions
 
-### 3. Audit trail
+### 3. Audit Trail
 
 ```python
-# Exemple de log d'action admin
+# Example admin action log
 admin_action_log = {
     "admin_id": user.id,
     "action": "approve_listing",
@@ -277,58 +277,57 @@ admin_action_log = {
 }
 ```
 
-## 📱 Interface utilisateur recommandée
+## 📱 Recommended User Interface
 
-### Sections principales
+### Main Sections
 
-1. **Dashboard** : Vue d'ensemble des métriques
-2. **Utilisateurs** : Liste et gestion des comptes
-3. **Annonces** : Modération des parkings
-4. **Signalements** : Résolution des problèmes
-5. **Statistiques** : Rapports et analyses
+1. **Dashboard**: Overview of metrics
+2. **Users**: Account list and management
+3. **Listings**: Parking moderation
+4. **Issue Reports**: Problem resolution
+5. **Statistics**: Reports and analytics
 
-### Fonctionnalités UX
+### UX Features
 
-- **Filtres** : Par statut, date, utilisateur
-- **Recherche** : Par ID, email, sujet
-- **Actions en lot** : Sélection multiple
-- **Notifications** : Alertes pour nouvelles actions
+- **Filters**: By status, date, user
+- **Search**: By ID, email, subject
+- **Bulk Actions**: Multiple selection
+- **Notifications**: Alerts for new actions
 
-## 🚀 Déploiement et configuration
+## 🚀 Deployment and Configuration
 
-### Variables d'environnement
+### Environment Variables
 
 ```bash
-# Admin par défaut (optionnel)
+# Default admin (optional)
 DEFAULT_ADMIN_EMAIL=admin@heirsprivpark.com
 
-# Notifications admin
+# Admin notifications
 ADMIN_NOTIFICATION_EMAIL=admin@heirsprivpark.com
 ```
 
-### Migration de base de données
+### Database Migration
 
 ```bash
-# Appliquer les migrations
+# Apply migrations
 cd backend
 alembic upgrade head
 
-# Vérifier les nouvelles tables
+# Check new tables
 psql -d privpark -c "\dt"
 ```
 
-## 🔧 Maintenance et monitoring
+## 🔧 Maintenance and Monitoring
 
-### Tâches régulières
+### Regular Tasks
 
-- **Quotidien** : Examiner les nouveaux signalements
-- **Hebdomadaire** : Analyser les métriques d'utilisation
-- **Mensuel** : Nettoyer les données anciennes
+- **Daily**: Review new issue reports
+- **Weekly**: Analyze usage metrics
+- **Monthly**: Clean up old data
 
-### Alertes recommandées
+### Recommended Alerts
 
-- Nouveau signalement urgent
-- Annonce en attente > 24h
-- Utilisateur suspendu
-- Problème technique détecté
-
+- New urgent issue report
+- Listing pending > 24h
+- Suspended user
+- Technical problem detected

@@ -1,24 +1,24 @@
-### Objectif
+### Objective
 
-Décrire le flow complet d’authentification (inscription, connexion, déconnexion) entre un frontend Flutter utilisant **Firebase Auth** et un backend FastAPI, en s’appuyant sur la documentation officielle Firebase et Flutter.
+Describe the complete authentication flow (registration, login, logout) between a Flutter frontend using **Firebase Auth** and a FastAPI backend, based on official Firebase and Flutter documentation.
 
-- Référence Firebase (projet `heirsprivpark`) : `https://console.firebase.google.com/u/0/project/heirsprivpark/settings/general/web:ODJiYzhlNzYtYTRlOS00ZmY5LWIxOWItOWIxYWE3NjkxZjJh`
-- Référence Flutter/Firebase : même page pour récupérer la configuration web et suivre le guide d’intégration.
+- Firebase reference (project `heirsprivpark`): `https://console.firebase.google.com/u/0/project/heirsprivpark/settings/general/web:ODJiYzhlNzYtYTRlOS00ZmY5LWIxOWItOWIxYWE3NjkxZjJh`
+- Flutter/Firebase reference: same page to retrieve web configuration and follow integration guide.
 
 ---
 
-## 1. Prérequis Firebase
+## 1. Firebase Prerequisites
 
-- **Créer un projet Firebase** ([console Firebase](https://console.firebase.google.com/)).
-- **Activer l’authentification Email/Password** dans la section Authentification > Méthode de connexion.
-- **Ajouter une application Flutter** dans le projet Firebase :
-  - Récupérer la configuration (`google-services.json` pour Android, `GoogleService-Info.plist` pour iOS).
-  - Pour le web, récupérer la config JS (`firebaseConfig`).
-- **Télécharger la clé de service** (JSON) pour le backend (Paramètres du projet > Comptes de service > Générer une nouvelle clé privée).
+- **Create a Firebase project** ([Firebase console](https://console.firebase.google.com/)).
+- **Enable Email/Password authentication** in Authentication > Sign-in method section.
+- **Add a Flutter application** to the Firebase project:
+  - Retrieve configuration (`google-services.json` for Android, `GoogleService-Info.plist` for iOS).
+  - For web, retrieve JS config (`firebaseConfig`).
+- **Download service key** (JSON) for backend (Project settings > Service accounts > Generate new private key).
 
-### Option recommandée : configuration via FlutterFire CLI
+### Recommended option: configuration via FlutterFire CLI
 
-Générez automatiquement `firebase_options.dart` avec les bons identifiants pour chaque plateforme :
+Automatically generate `firebase_options.dart` with correct identifiers for each platform:
 
 ```bash
 npm i -g firebase-tools
@@ -26,15 +26,15 @@ dart pub global activate flutterfire_cli
 flutterfire configure --project heirsprivpark
 ```
 
-Cela crée `lib/firebase_options.dart` et permet d’initialiser Firebase avec `DefaultFirebaseOptions.currentPlatform` (voir section 2.b).
+This creates `lib/firebase_options.dart` and allows Firebase initialization with `DefaultFirebaseOptions.currentPlatform` (see section 2.b).
 
 ---
 
-## 2. Intégration Flutter
+## 2. Flutter Integration
 
-### a. Dépendances
+### a. Dependencies
 
-Ajouter dans `pubspec.yaml` :
+Add to `pubspec.yaml`:
 
 ```yaml
 dependencies:
@@ -44,9 +44,9 @@ dependencies:
   http: ^1.0.0
 ```
 
-### b. Initialisation Firebase
+### b. Firebase Initialization
 
-Avec FlutterFire CLI (recommandé) :
+With FlutterFire CLI (recommended):
 
 ```dart
 import 'package:flutter/material.dart';
@@ -62,19 +62,19 @@ void main() async {
 }
 ```
 
-Sans FlutterFire CLI (web uniquement), utilisez la config web depuis la console Firebase pour initialiser, mais évitez de versionner des secrets.
+Without FlutterFire CLI (web only), use web config from Firebase console to initialize, but avoid versioning secrets.
 
-### c. Inscription (Sign Up)
+### c. Registration (Sign Up)
 
 ```dart
 final cred = await FirebaseAuth.instance.createUserWithEmailAndPassword(
   email: email,
   password: password,
 );
-final idToken = await cred.user?.getIdToken(true); // Récupère l’ID Token Firebase
+final idToken = await cred.user?.getIdToken(true); // Retrieve Firebase ID Token
 ```
 
-### d. Connexion (Sign In)
+### d. Login (Sign In)
 
 ```dart
 final cred = await FirebaseAuth.instance.signInWithEmailAndPassword(
@@ -84,7 +84,7 @@ final cred = await FirebaseAuth.instance.signInWithEmailAndPassword(
 final idToken = await cred.user?.getIdToken(true);
 ```
 
-### e. Appel Backend avec token
+### e. Backend Call with Token
 
 ```dart
 final headers = {
@@ -97,11 +97,11 @@ final response = await http.post(
 );
 ```
 
-### f. Déconnexion (Sign Out)
+### f. Logout (Sign Out)
 
 ```dart
 await FirebaseAuth.instance.signOut();
-// Purger tout token stocké localement (ex: flutter_secure_storage)
+// Purge any locally stored token (e.g., flutter_secure_storage)
 ```
 
 ---

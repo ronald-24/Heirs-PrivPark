@@ -15,7 +15,7 @@ router = APIRouter(prefix="/admin", tags=["admin"])
 
 @router.post("/schedule-reminders")
 def schedule_booking_reminders(db: Session = Depends(get_db)):
-    """Endpoint pour programmer les rappels de réservation (à appeler périodiquement)"""
+    """Endpoint to schedule booking reminders (to be called periodically)"""
     try:
         NotificationService.schedule_booking_reminders(db)
         return {"message": "Booking reminders scheduled successfully"}
@@ -26,7 +26,7 @@ def schedule_booking_reminders(db: Session = Depends(get_db)):
 
 @router.post("/process-periodic-reminders")
 def process_periodic_reminders(db: Session = Depends(get_db)):
-    """Endpoint pour traiter les rappels périodiques (à appeler toutes les 30 minutes)"""
+    """Endpoint to process periodic reminders (to be called every 30 minutes)"""
     try:
         notifications_sent = NotificationService.process_periodic_reminders(db)
         return {
@@ -40,7 +40,7 @@ def process_periodic_reminders(db: Session = Depends(get_db)):
 
 @router.post("/schedule-start-reminders")
 def schedule_booking_start_reminders(db: Session = Depends(get_db)):
-    """Endpoint pour démarrer les rappels périodiques pour les réservations qui commencent"""
+    """Endpoint to start periodic reminders for bookings that are starting"""
     try:
         NotificationService.schedule_booking_start_reminders(db)
         return {"message": "Booking start reminders scheduled successfully"}
@@ -54,7 +54,7 @@ def get_my_active_reminders(
     Authorization: str | None = Header(default=None),
     db: Session = Depends(get_db)
 ):
-    """Récupérer les rappels actifs de l'utilisateur connecté"""
+    """Get active reminders for the logged-in user"""
     user, _ = verify_bearer_token_and_get_user(
         authorization=Authorization, db=db
     )
@@ -83,12 +83,12 @@ def stop_booking_reminder(
     Authorization: str | None = Header(default=None),
     db: Session = Depends(get_db)
 ):
-    """Arrêter les rappels pour une réservation spécifique"""
+    """Stop reminders for a specific booking"""
     user, _ = verify_bearer_token_and_get_user(
         authorization=Authorization, db=db
     )
 
-    # Vérifier que la réservation appartient à l'utilisateur
+    # Check that the booking belongs to the user
     booking = get_booking(db, booking_id)
     if not booking or booking.user_id != user.id:
         raise HTTPException(status_code=404, detail="Booking not found")

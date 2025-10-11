@@ -8,7 +8,7 @@ from app.db.base import Base
 
 
 class ActiveReminder(Base):
-    """Table pour gérer les rappels actifs en cours"""
+    """Table to manage active ongoing reminders"""
     __tablename__ = "active_reminders"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
@@ -16,11 +16,11 @@ class ActiveReminder(Base):
     booking_id: Mapped[int] = mapped_column(
         ForeignKey("bookings.id"), index=True)
 
-    # Détails de la réservation
+    # Booking details
     start_time: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     end_time: Mapped[datetime] = mapped_column(DateTime(timezone=True))
 
-    # Gestion des rappels
+    # Reminder management
     last_reminder_sent: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True
     )

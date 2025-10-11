@@ -9,13 +9,13 @@ from app.db.base import Base
 
 
 class NotificationType(str, enum.Enum):
-    booking_confirmation = "booking_confirmation"  # Réservation créée
-    payment_confirmation = "payment_confirmation"  # Paiement réussi
-    booking_reminder = "booking_reminder"  # Rappel avant début de réservation
-    # Rappel de fin de réservation (toutes les 30min)
+    booking_confirmation = "booking_confirmation"  # Booking created
+    payment_confirmation = "payment_confirmation"  # Payment successful
+    booking_reminder = "booking_reminder"  # Reminder before booking start
+    # Booking end reminder (every 30min)
     booking_end_reminder = "booking_end_reminder"
-    booking_cancelled = "booking_cancelled"  # Réservation annulée
-    payment_failed = "payment_failed"  # Paiement échoué
+    booking_cancelled = "booking_cancelled"  # Booking cancelled
+    payment_failed = "payment_failed"  # Payment failed
 
 
 class Notification(Base):
@@ -24,24 +24,24 @@ class Notification(Base):
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
 
-    # Type de notification
+    # Notification type
     type: Mapped[NotificationType] = mapped_column(Enum(NotificationType))
 
-    # Contenu de la notification
+    # Notification content
     title: Mapped[str] = mapped_column(String(255))
     message: Mapped[str] = mapped_column(Text)
 
-    # Données supplémentaires (JSON serializable)
+    # Additional data (JSON serializable)
     data: Mapped[str | None] = mapped_column(
         Text, nullable=True)  # JSON string
 
-    # Références optionnelles
+    # Optional references
     booking_id: Mapped[int | None] = mapped_column(
         ForeignKey("bookings.id"), nullable=True)
     payment_id: Mapped[int | None] = mapped_column(
         ForeignKey("payments.id"), nullable=True)
 
-    # État de la notification
+    # Notification state
     is_read: Mapped[bool] = mapped_column(Boolean, default=False)
 
     # Timestamps

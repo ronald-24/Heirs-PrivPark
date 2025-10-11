@@ -16,7 +16,7 @@ from app.db.repositories.active_reminder_repo import (
 
 
 class NotificationService:
-    """Service pour gérer la création automatique des notifications"""
+    """Service for managing automatic notification creation"""
 
     @staticmethod
     def create_booking_confirmation_notification(
@@ -24,9 +24,9 @@ class NotificationService:
         booking: Booking,
         user: User
     ) -> None:
-        """Créer une notification de confirmation de réservation"""
-        title = "Réservation confirmée"
-        message = f"Votre réservation pour le parking #{booking.parking_space_id} a été créée avec succès. Début: {booking.start_time.strftime('%d/%m/%Y à %H:%M')}"
+        """Create a booking confirmation notification"""
+        title = "Booking Confirmed"
+        message = f"Your booking for parking #{booking.parking_space_id} has been created successfully. Start: {booking.start_time.strftime('%d/%m/%Y at %H:%M')}"
 
         data = {
             "booking_id": booking.id,
@@ -53,9 +53,9 @@ class NotificationService:
         payment: Payment,
         user: User
     ) -> None:
-        """Créer une notification de confirmation de paiement"""
-        title = "Paiement confirmé"
-        message = f"Votre paiement de {payment.amount} {payment.currency.upper()} a été traité avec succès. Votre réservation est maintenant confirmée."
+        """Create a payment confirmation notification"""
+        title = "Payment Confirmed"
+        message = f"Your payment of {payment.amount} {payment.currency.upper()} has been processed successfully. Your booking is now confirmed."
 
         data = {
             "payment_id": payment.id,
@@ -83,9 +83,9 @@ class NotificationService:
         booking: Booking,
         user: User
     ) -> None:
-        """Créer une notification de rappel avant le début de la réservation"""
-        title = "Rappel de réservation"
-        message = f"Votre réservation pour le parking #{booking.parking_space_id} commence dans 1 heure. Début: {booking.start_time.strftime('%d/%m/%Y à %H:%M')}"
+        """Create a notification reminder before booking start"""
+        title = "Booking Reminder"
+        message = f"Your booking for parking #{booking.parking_space_id} starts in 1 hour. Start: {booking.start_time.strftime('%d/%m/%Y at %H:%M')}"
 
         data = {
             "booking_id": booking.id,
@@ -111,9 +111,9 @@ class NotificationService:
         booking: Booking,
         user: User
     ) -> None:
-        """Créer une notification d'annulation de réservation"""
-        title = "Réservation annulée"
-        message = f"Votre réservation pour le parking #{booking.parking_space_id} a été annulée."
+        """Create a booking cancellation notification"""
+        title = "Booking Cancelled"
+        message = f"Your booking for parking #{booking.parking_space_id} has been cancelled."
 
         data = {
             "booking_id": booking.id,
@@ -140,11 +140,11 @@ class NotificationService:
         user: User,
         error_message: Optional[str] = None
     ) -> None:
-        """Créer une notification d'échec de paiement"""
-        title = "Paiement échoué"
-        message = f"Le paiement pour votre réservation du parking #{booking.parking_space_id} a échoué."
+        """Create a payment failure notification"""
+        title = "Payment Failed"
+        message = f"Payment for your booking at parking #{booking.parking_space_id} has failed."
         if error_message:
-            message += f" Raison: {error_message}"
+            message += f" Reason: {error_message}"
 
         data = {
             "booking_id": booking.id,
@@ -172,9 +172,9 @@ class NotificationService:
         user: User,
         minutes_remaining: int
     ) -> None:
-        """Créer une notification de rappel de fin de réservation"""
-        title = "Rappel de fin de réservation"
-        message = f"Votre réservation pour le parking #{booking.parking_space_id} se termine dans {minutes_remaining} minutes. Fin prévue: {booking.end_time.strftime('%d/%m/%Y à %H:%M')}"
+        """Create a booking end reminder notification"""
+        title = "Booking End Reminder"
+        message = f"Your booking for parking #{booking.parking_space_id} ends in {minutes_remaining} minutes. Expected end: {booking.end_time.strftime('%d/%m/%Y at %H:%M')}"
 
         data = {
             "booking_id": booking.id,
@@ -201,8 +201,8 @@ class NotificationService:
         user: User,
         reminder_interval_minutes: int = 30
     ) -> None:
-        """Démarrer les rappels périodiques pour une réservation"""
-        # Créer un rappel actif
+        """Start periodic reminders for a booking"""
+        # Create an active reminder
         create_active_reminder(
             db=db,
             user_id=user.id,
@@ -217,51 +217,51 @@ class NotificationService:
         db: Session,
         booking: Booking
     ) -> None:
-        """Arrêter les rappels périodiques pour une réservation"""
+        """Stop periodic reminders for a booking"""
         deactivate_reminder(db, booking.id)
 
     @staticmethod
     def process_periodic_reminders(db: Session) -> int:
-        """Traiter tous les rappels périodiques en attente"""
-        # Nettoyer d'abord les rappels expirés
+        """Process all pending periodic reminders"""
+        # First clean up expired reminders
         cleanup_expired_reminders(db)
 
-        # Récupérer les rappels prêts pour notification
+        # Get reminders ready for notification
         active_reminders = get_active_reminders_ready_for_notification(db)
 
         notifications_sent = 0
         for reminder in active_reminders:
             try:
-                # Calculer le temps restant
+                # Calculate remaining time
                 current_time = datetime.utcnow()
                 time_remaining = reminder.end_time - current_time
                 minutes_remaining = int(time_remaining.total_seconds() / 60)
 
-                # Créer la notification
+                # Create the notification
                 NotificationService.create_booking_end_reminder_notification(
                     db, reminder.booking, reminder.user, minutes_remaining
                 )
 
-                # Mettre à jour la date du dernier rappel
+                # Update last reminder sent date
                 update_last_reminder_sent(db, reminder.id)
 
                 notifications_sent += 1
 
             except Exception as e:
                 print(
-                    f"Erreur lors de l'envoi du rappel pour la réservation {reminder.booking_id}: {e}")
+                    f"Error sending reminder for booking {reminder.booking_id}: {e}")
                 continue
 
         return notifications_sent
 
     @staticmethod
     def schedule_booking_reminders(db: Session) -> None:
-        """Programmer les rappels pour les réservations qui commencent dans 1 heure"""
+        """Schedule reminders for bookings starting in 1 hour"""
         from sqlalchemy import select
 
-        # Trouver les réservations confirmées qui commencent dans 1 heure
+        # Find confirmed bookings starting in 1 hour
         one_hour_from_now = datetime.utcnow() + timedelta(hours=1)
-        one_hour_window = timedelta(minutes=30)  # Fenêtre de 30 minutes
+        one_hour_window = timedelta(minutes=30)  # 30-minute window
 
         bookings = db.execute(
             select(Booking).where(
@@ -272,7 +272,7 @@ class NotificationService:
         ).scalars().all()
 
         for booking in bookings:
-            # Vérifier si un rappel n'a pas déjà été envoyé
+            # Check if a reminder hasn't already been sent
             from app.db.repositories.notification_repo import get_notifications_for_user
             notifications = get_notifications_for_user(
                 db, booking.user_id, limit=100)
@@ -288,13 +288,13 @@ class NotificationService:
 
     @staticmethod
     def schedule_booking_start_reminders(db: Session) -> None:
-        """Programmer les rappels pour les réservations qui commencent maintenant"""
+        """Schedule reminders for bookings starting now"""
         from sqlalchemy import select
 
         current_time = datetime.utcnow()
-        time_window = timedelta(minutes=5)  # Fenêtre de 5 minutes
+        time_window = timedelta(minutes=5)  # 5-minute window
 
-        # Trouver les réservations confirmées qui commencent maintenant
+        # Find confirmed bookings starting now
         bookings = db.execute(
             select(Booking).where(
                 Booking.status == BookingStatus.confirmed,
@@ -304,6 +304,6 @@ class NotificationService:
         ).scalars().all()
 
         for booking in bookings:
-            # Démarrer les rappels périodiques de fin
+            # Start periodic end reminders
             NotificationService.start_booking_end_reminders(
                 db, booking, booking.user)

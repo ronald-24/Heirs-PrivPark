@@ -118,13 +118,13 @@ async def stripe_webhook(request: Request, db: Session = Depends(get_db)):
                     receipt_url=receipt_url,
                 )
 
-                # Créer une notification de confirmation de paiement
+                # Create a payment confirmation notification
                 try:
                     NotificationService.create_payment_confirmation_notification(
                         db, payment, booking.user)
                 except Exception as e:
-                    # Log l'erreur mais ne pas faire échouer le processus de paiement
+                    # Log the error but don't fail the payment process
                     print(
-                        f"Erreur lors de la création de la notification de paiement: {e}")
+                        f"Error creating payment notification: {e}")
 
     return {"received": True}

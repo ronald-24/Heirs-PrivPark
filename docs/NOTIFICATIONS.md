@@ -1,46 +1,46 @@
-# Système de Notifications - Heirs PrivPark
+# Notification System - Heirs PrivPark
 
-## Vue d'ensemble
+## Overview
 
-Le système de notifications de base a été implémenté pour fournir des notifications automatiques aux utilisateurs concernant leurs réservations et paiements, incluant des rappels périodiques toutes les 30 minutes pendant qu'une réservation est en cours.
+The basic notification system has been implemented to provide automatic notifications to users regarding their bookings and payments, including periodic reminders every 30 minutes while a booking is in progress.
 
-## Fonctionnalités implémentées
+## Implemented Features
 
-### Types de notifications
+### Notification Types
 
-1. **Confirmation de réservation** (`booking_confirmation`)
+1. **Booking Confirmation** (`booking_confirmation`)
 
-   - Envoyée quand une réservation est créée
-   - Contient les détails de la réservation (parking, horaires, montant)
+   - Sent when a booking is created
+   - Contains booking details (parking, times, amount)
 
-2. **Confirmation de paiement** (`payment_confirmation`)
+2. **Payment Confirmation** (`payment_confirmation`)
 
-   - Envoyée quand un paiement est réussi
-   - Contient les détails du paiement et le lien vers le reçu
+   - Sent when a payment is successful
+   - Contains payment details and receipt link
 
-3. **Rappel de réservation** (`booking_reminder`)
+3. **Booking Reminder** (`booking_reminder`)
 
-   - Envoyée 1 heure avant le début de la réservation
-   - Peut être programmée via un endpoint dédié
+   - Sent 1 hour before booking start
+   - Can be scheduled via dedicated endpoint
 
-4. **Rappel de fin de réservation** (`booking_end_reminder`) ⭐ **NOUVEAU**
+4. **Booking End Reminder** (`booking_end_reminder`) ⭐ **NEW**
 
-   - Envoyée toutes les 30 minutes pendant qu'une réservation est en cours
-   - Rappelle à l'utilisateur la fin imminente de sa réservation
-   - Contient le temps restant en minutes
+   - Sent every 30 minutes while a booking is in progress
+   - Reminds user of imminent booking end
+   - Contains remaining time in minutes
 
-5. **Annulation de réservation** (`booking_cancelled`)
+5. **Booking Cancellation** (`booking_cancelled`)
 
-   - Envoyée quand une réservation est annulée
-   - Contient les détails de l'annulation
+   - Sent when a booking is cancelled
+   - Contains cancellation details
 
-6. **Échec de paiement** (`payment_failed`)
-   - Envoyée quand un paiement échoue
-   - Contient les détails de l'erreur
+6. **Payment Failure** (`payment_failed`)
+   - Sent when a payment fails
+   - Contains error details
 
-## Structure de la base de données
+## Database Structure
 
-### Table `notifications`
+### `notifications` Table
 
 ```sql
 CREATE TABLE notifications (
@@ -49,7 +49,7 @@ CREATE TABLE notifications (
     type notificationtype NOT NULL,
     title VARCHAR(255) NOT NULL,
     message TEXT NOT NULL,
-    data TEXT, -- JSON string pour données supplémentaires
+    data TEXT, -- JSON string for additional data
     booking_id INTEGER REFERENCES bookings(id),
     payment_id INTEGER REFERENCES payments(id),
     is_read BOOLEAN DEFAULT FALSE,
@@ -58,7 +58,7 @@ CREATE TABLE notifications (
 );
 ```
 
-### Table `active_reminders` ⭐ **NOUVEAU**
+### `active_reminders` Table ⭐ **NEW**
 
 ```sql
 CREATE TABLE active_reminders (
@@ -75,14 +75,14 @@ CREATE TABLE active_reminders (
 );
 ```
 
-### Enum `notificationtype`
+### `notificationtype` Enum
 
 ```sql
 CREATE TYPE notificationtype AS ENUM (
     'booking_confirmation',
     'payment_confirmation',
     'booking_reminder',
-    'booking_end_reminder',  -- ⭐ NOUVEAU
+    'booking_end_reminder',  -- ⭐ NEW
     'booking_cancelled',
     'payment_failed'
 );
@@ -90,152 +90,152 @@ CREATE TYPE notificationtype AS ENUM (
 
 ## API Endpoints
 
-### Notifications utilisateur
+### User Notifications
 
-- `GET /notifications/` - Récupérer les notifications de l'utilisateur
-- `GET /notifications/stats` - Statistiques des notifications
-- `GET /notifications/{id}` - Récupérer une notification spécifique
-- `PATCH /notifications/{id}/read` - Marquer comme lue
-- `POST /notifications/mark-all-read` - Marquer toutes comme lues
-- `DELETE /notifications/{id}` - Supprimer une notification
+- `GET /notifications/` - Get user notifications
+- `GET /notifications/stats` - Notification statistics
+- `GET /notifications/{id}` - Get specific notification
+- `PATCH /notifications/{id}/read` - Mark as read
+- `POST /notifications/mark-all-read` - Mark all as read
+- `DELETE /notifications/{id}` - Delete notification
 
-### Administration et rappels ⭐ **NOUVEAU**
+### Administration and Reminders ⭐ **NEW**
 
-- `POST /admin/schedule-reminders` - Programmer les rappels de début de réservation
-- `POST /admin/process-periodic-reminders` - Traiter les rappels périodiques (30min)
-- `POST /admin/schedule-start-reminders` - Démarrer les rappels pour réservations en cours
-- `GET /admin/my-active-reminders` - Récupérer les rappels actifs de l'utilisateur
-- `POST /admin/stop-reminder/{booking_id}` - Arrêter les rappels pour une réservation
+- `POST /admin/schedule-reminders` - Schedule booking start reminders
+- `POST /admin/process-periodic-reminders` - Process periodic reminders (30min)
+- `POST /admin/schedule-start-reminders` - Start reminders for ongoing bookings
+- `GET /admin/my-active-reminders` - Get user's active reminders
+- `POST /admin/stop-reminder/{booking_id}` - Stop reminders for a booking
 
-## Utilisation
+## Usage
 
-### Intégration automatique
+### Automatic Integration
 
-Les notifications sont automatiquement créées lors des événements suivants :
+Notifications are automatically created during the following events:
 
-1. **Création de réservation** - Notification de confirmation
-2. **Paiement réussi** - Notification de confirmation de paiement
-3. **Annulation de réservation** - Notification d'annulation
+1. **Booking Creation** - Confirmation notification
+2. **Successful Payment** - Payment confirmation notification
+3. **Booking Cancellation** - Cancellation notification
 
-### Programmation des rappels périodiques ⭐ **NOUVEAU**
+### Periodic Reminder Scheduling ⭐ **NEW**
 
-Le système de rappels périodiques fonctionne en plusieurs étapes :
+The periodic reminder system works in several steps:
 
-1. **Démarrage automatique** : Quand une réservation commence, les rappels périodiques sont automatiquement démarrés
-2. **Traitement périodique** : Un endpoint doit être appelé toutes les 30 minutes pour traiter les rappels
-3. **Nettoyage automatique** : Les rappels expirés sont automatiquement nettoyés
+1. **Automatic Start**: When a booking begins, periodic reminders are automatically started
+2. **Periodic Processing**: An endpoint must be called every 30 minutes to process reminders
+3. **Automatic Cleanup**: Expired reminders are automatically cleaned up
 
-#### Configuration recommandée
+#### Recommended Configuration
 
 ```bash
-# Cron job pour traiter les rappels toutes les 30 minutes
+# Cron job to process reminders every 30 minutes
 */30 * * * * curl -X POST http://your-api/admin/process-periodic-reminders
 
-# Cron job pour démarrer les rappels pour les réservations qui commencent (toutes les 5 minutes)
+# Cron job to start reminders for bookings that begin (every 5 minutes)
 */5 * * * * curl -X POST http://your-api/admin/schedule-start-reminders
 
-# Cron job pour les rappels de début de réservation (toutes les heures)
+# Cron job for booking start reminders (every hour)
 0 * * * * curl -X POST http://your-api/admin/schedule-reminders
 ```
 
-### Exemple d'utilisation
+### Usage Example
 
 ```python
 from app.services.notification_service import NotificationService
 
-# Créer une notification personnalisée
+# Create a custom notification
 NotificationService.create_booking_confirmation_notification(
     db, booking, user
 )
 
-# Démarrer les rappels périodiques pour une réservation
+# Start periodic reminders for a booking
 NotificationService.start_booking_end_reminders(db, booking, user)
 
-# Traiter tous les rappels en attente
+# Process all pending reminders
 notifications_sent = NotificationService.process_periodic_reminders(db)
 
-# Arrêter les rappels pour une réservation
+# Stop reminders for a booking
 NotificationService.stop_booking_end_reminders(db, booking)
 ```
 
 ## Migration
 
-Pour appliquer les changements à la base de données :
+To apply changes to the database:
 
 ```bash
 cd backend
 alembic upgrade head
 ```
 
-## Test
+## Testing
 
-Un script de test amélioré est fourni pour vérifier le fonctionnement :
+An improved test script is provided to verify functionality:
 
 ```bash
 python test_notifications.py
 ```
 
-Le script teste maintenant :
+The script now tests:
 
-- ✅ Notifications de confirmation de réservation
-- ✅ Démarrage des rappels périodiques
-- ✅ Envoi de rappels toutes les 30 minutes
-- ✅ Arrêt des rappels
-- ✅ Nettoyage des rappels expirés
-- ✅ Statistiques des notifications
+- ✅ Booking confirmation notifications
+- ✅ Starting periodic reminders
+- ✅ Sending reminders every 30 minutes
+- ✅ Stopping reminders
+- ✅ Cleaning up expired reminders
+- ✅ Notification statistics
 
-## Structure des fichiers
+## File Structure
 
 ```
 backend/
 ├── app/
 │   ├── db/
 │   │   ├── models/
-│   │   │   ├── notification.py          # Modèle Notification
-│   │   │   └── active_reminder.py      # ⭐ NOUVEAU: Modèle ActiveReminder
+│   │   │   ├── notification.py          # Notification Model
+│   │   │   └── active_reminder.py      # ⭐ NEW: ActiveReminder Model
 │   │   └── repositories/
-│   │       ├── notification_repo.py    # Repository pour les notifications
-│   │       └── active_reminder_repo.py # ⭐ NOUVEAU: Repository pour les rappels actifs
+│   │       ├── notification_repo.py    # Repository for notifications
+│   │       └── active_reminder_repo.py # ⭐ NEW: Repository for active reminders
 │   ├── schemas/
-│   │   └── notification.py              # Schémas Pydantic
+│   │   └── notification.py              # Pydantic Schemas
 │   ├── services/
-│   │   └── notification_service.py     # Service de gestion des notifications
+│   │   └── notification_service.py     # Notification management service
 │   └── api/
-│       ├── routes_notifications.py     # Routes API notifications
-│       └── routes_reminders.py         # Routes pour les rappels (amélioré)
+│       ├── routes_notifications.py     # Notification API routes
+│       └── routes_reminders.py         # Routes for reminders (enhanced)
 ├── alembic/versions/
-│   ├── 0004_add_notifications.py       # Migration notifications
-│   └── 0005_add_active_reminders.py   # ⭐ NOUVEAU: Migration rappels actifs
-└── test_notifications.py              # Script de test (amélioré)
+│   ├── 0004_add_notifications.py       # Notifications migration
+│   └── 0005_add_active_reminders.py   # ⭐ NEW: Active reminders migration
+└── test_notifications.py              # Test script (enhanced)
 ```
 
-## Fonctionnement des rappels périodiques ⭐ **NOUVEAU**
+## Periodic Reminders Functionality ⭐ **NEW**
 
-### Cycle de vie d'une réservation avec rappels
+### Booking Lifecycle with Reminders
 
-1. **Réservation créée** → Notification de confirmation
-2. **Paiement réussi** → Notification de confirmation de paiement
-3. **1 heure avant le début** → Rappel de début de réservation
-4. **Début de réservation** → Démarrage automatique des rappels périodiques
-5. **Pendant la réservation** → Rappel toutes les 30 minutes
-6. **Fin de réservation** → Arrêt automatique des rappels
+1. **Booking Created** → Confirmation notification
+2. **Payment Successful** → Payment confirmation notification
+3. **1 hour before start** → Booking start reminder
+4. **Booking Start** → Automatic start of periodic reminders
+5. **During booking** → Reminder every 30 minutes
+6. **Booking End** → Automatic stop of reminders
 
-### Gestion intelligente des rappels
+### Intelligent Reminder Management
 
-- **Évite les doublons** : Vérifie qu'un rappel n'a pas déjà été envoyé dans l'intervalle
-- **Nettoyage automatique** : Supprime les rappels pour les réservations terminées
-- **Gestion d'erreurs** : Continue le traitement même si une notification échoue
-- **Statistiques** : Retourne le nombre de notifications envoyées
+- **Avoids Duplicates**: Checks that a reminder hasn't already been sent in the interval
+- **Automatic Cleanup**: Removes reminders for completed bookings
+- **Error Handling**: Continues processing even if a notification fails
+- **Statistics**: Returns the number of notifications sent
 
-## Exemples de notifications
+## Notification Examples
 
-### Confirmation de réservation
+### Booking Confirmation
 
 ```json
 {
   "type": "booking_confirmation",
-  "title": "Réservation confirmée",
-  "message": "Votre réservation pour le parking #123 a été créée avec succès. Début: 15/01/2024 à 14:00",
+  "title": "Booking Confirmed",
+  "message": "Your booking for parking #123 has been created successfully. Start: 15/01/2024 at 14:00",
   "data": {
     "booking_id": 456,
     "parking_space_id": 123,
@@ -247,13 +247,13 @@ backend/
 }
 ```
 
-### Rappel de fin de réservation
+### Booking End Reminder
 
 ```json
 {
   "type": "booking_end_reminder",
-  "title": "Rappel de fin de réservation",
-  "message": "Votre réservation pour le parking #123 se termine dans 30 minutes. Fin prévue: 15/01/2024 à 16:00",
+  "title": "Booking End Reminder",
+  "message": "Your booking for parking #123 ends in 30 minutes. Expected end: 15/01/2024 at 16:00",
   "data": {
     "booking_id": 456,
     "parking_space_id": 123,
@@ -264,13 +264,13 @@ backend/
 }
 ```
 
-### Confirmation de paiement
+### Payment Confirmation
 
 ```json
 {
   "type": "payment_confirmation",
-  "title": "Paiement confirmé",
-  "message": "Votre paiement de 20.0 USD a été traité avec succès. Votre réservation est maintenant confirmée.",
+  "title": "Payment Confirmed",
+  "message": "Your payment of 20.0 USD has been processed successfully. Your booking is now confirmed.",
   "data": {
     "payment_id": 789,
     "booking_id": 456,
@@ -282,83 +282,83 @@ backend/
 }
 ```
 
-## Gestion des erreurs
+## Error Handling
 
-Le système de notifications est conçu pour être robuste :
+The notification system is designed to be robust:
 
-- **Notifications non bloquantes** : Les erreurs de notification n'affectent pas les opérations principales
-- **Logging des erreurs** : Toutes les erreurs sont loggées pour le debugging
-- **Retry automatique** : Possibilité d'implémenter un système de retry
-- **Fallback** : En cas d'échec, les données sont conservées pour retry ultérieur
+- **Non-blocking Notifications**: Notification errors don't affect main operations
+- **Error Logging**: All errors are logged for debugging
+- **Automatic Retry**: Possibility to implement a retry system
+- **Fallback**: In case of failure, data is preserved for later retry
 
-## Monitoring et statistiques
+## Monitoring and Statistics
 
-### Endpoints de monitoring
+### Monitoring Endpoints
 
-- `GET /notifications/stats` - Statistiques par utilisateur
-- `GET /admin/my-active-reminders` - Rappels actifs par utilisateur
+- `GET /notifications/stats` - Statistics per user
+- `GET /admin/my-active-reminders` - Active reminders per user
 
-### Métriques disponibles
+### Available Metrics
 
-- Nombre total de notifications
-- Nombre de notifications non lues
-- Répartition par type de notification
-- Nombre de rappels actifs
-- Nombre de notifications envoyées par traitement
+- Total number of notifications
+- Number of unread notifications
+- Distribution by notification type
+- Number of active reminders
+- Number of notifications sent per processing
 
-## Sécurité
+## Security
 
-- **Authentification requise** : Tous les endpoints utilisateur nécessitent une authentification
-- **Isolation des données** : Les utilisateurs ne peuvent accéder qu'à leurs propres notifications
-- **Validation des données** : Toutes les données d'entrée sont validées
-- **Protection CSRF** : Les endpoints utilisent les tokens d'authentification appropriés
+- **Authentication Required**: All user endpoints require authentication
+- **Data Isolation**: Users can only access their own notifications
+- **Data Validation**: All input data is validated
+- **CSRF Protection**: Endpoints use appropriate authentication tokens
 
 ## Performance
 
-### Optimisations implémentées
+### Implemented Optimizations
 
-- **Index sur les colonnes fréquemment utilisées** : `user_id`, `booking_id`, `created_at`
-- **Pagination** : Limite par défaut de 50 notifications avec possibilité d'augmenter
-- **Nettoyage automatique** : Suppression des rappels expirés
-- **Requêtes optimisées** : Utilisation de jointures efficaces
+- **Indexes on Frequently Used Columns**: `user_id`, `booking_id`, `created_at`
+- **Pagination**: Default limit of 50 notifications with possibility to increase
+- **Automatic Cleanup**: Removal of expired reminders
+- **Optimized Queries**: Use of efficient joins
 
-### Recommandations
+### Recommendations
 
-- **Archivage** : Considérer l'archivage des anciennes notifications
-- **Cache** : Implémenter un cache Redis pour les statistiques fréquentes
-- **Batch processing** : Traiter les notifications par lots pour de gros volumes
+- **Archiving**: Consider archiving old notifications
+- **Cache**: Implement Redis cache for frequent statistics
+- **Batch Processing**: Process notifications in batches for large volumes
 
-## Prochaines étapes
+## Next Steps
 
-Pour étendre le système de notifications :
+To extend the notification system:
 
-1. **Notifications push** - Intégration avec Firebase Cloud Messaging
-2. **Notifications email** - Envoi d'emails automatiques
-3. **Notifications SMS** - Intégration avec un service SMS
-4. **Préférences utilisateur** - Permettre aux utilisateurs de configurer leurs préférences
-5. **Templates** - Système de templates pour les messages
-6. **Historique** - Archivage des anciennes notifications
-7. **Analytics** - Statistiques d'engagement des notifications
-8. **Rappels personnalisés** - Permettre aux utilisateurs de définir leurs propres intervalles
-9. **Notifications géolocalisées** - Rappels basés sur la proximité du parking
-10. **Notifications multi-langues** - Support de plusieurs langues
+1. **Push Notifications** - Integration with Firebase Cloud Messaging
+2. **Email Notifications** - Automatic email sending
+3. **SMS Notifications** - Integration with SMS service
+4. **User Preferences** - Allow users to configure their preferences
+5. **Templates** - Message template system
+6. **History** - Archiving of old notifications
+7. **Analytics** - Notification engagement statistics
+8. **Custom Reminders** - Allow users to define their own intervals
+9. **Geolocated Notifications** - Reminders based on parking proximity
+10. **Multi-language Notifications** - Support for multiple languages
 
-## Support et maintenance
+## Support and Maintenance
 
-### Logs à surveiller
+### Logs to Monitor
 
-- Erreurs de création de notifications
-- Échecs d'envoi de rappels périodiques
-- Problèmes de nettoyage des rappels expirés
-- Erreurs d'authentification sur les endpoints
+- Notification creation errors
+- Periodic reminder sending failures
+- Expired reminder cleanup problems
+- Authentication errors on endpoints
 
-### Maintenance régulière
+### Regular Maintenance
 
-- Vérifier les cron jobs
-- Surveiller les performances des requêtes
-- Nettoyer les anciennes notifications si nécessaire
-- Mettre à jour les templates de messages
+- Check cron jobs
+- Monitor query performance
+- Clean up old notifications if necessary
+- Update message templates
 
 ## Conclusion
 
-Le système de notifications de Heirs PrivPark fournit une solution complète pour informer les utilisateurs de l'état de leurs réservations et paiements. Avec les rappels périodiques toutes les 30 minutes, les utilisateurs sont toujours informés du temps restant de leur réservation, améliorant ainsi leur expérience utilisateur et réduisant les risques de dépassement de temps.
+The Heirs PrivPark notification system provides a complete solution for informing users about the status of their bookings and payments. With periodic reminders every 30 minutes, users are always informed of the remaining time of their booking, thus improving their user experience and reducing the risks of time overruns.

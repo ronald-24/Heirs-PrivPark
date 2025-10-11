@@ -1,57 +1,57 @@
-# Guide de Développement - Heirs-PrivPark
+# Development Guide - Heirs-PrivPark
 
-## Structure du Projet
+## Project Structure
 
 ```
 Heirs-PrivPark/
-├── backend/                 # API FastAPI
+├── backend/                 # FastAPI API
 │   ├── app/
-│   │   ├── api/            # Routes API
+│   │   ├── api/            # API Routes
 │   │   ├── core/           # Configuration
-│   │   ├── db/             # Base de données
-│   │   └── schemas/        # Modèles Pydantic
-│   ├── secrets/            # Clés Firebase
-│   ├── .env               # Variables d'environnement
-│   └── requirements.txt   # Dépendances Python
-├── mobile/                # App Flutter (à créer)
+│   │   ├── db/             # Database
+│   │   └── schemas/        # Pydantic Models
+│   ├── secrets/            # Firebase Keys
+│   ├── .env               # Environment Variables
+│   └── requirements.txt   # Python Dependencies
+├── mobile/                # Flutter App (to be created)
 ├── docs/                  # Documentation
-├── test/                  # Tests automatisés
+├── test/                  # Automated Tests
 └── README.md
 ```
 
-## Configuration de l'environnement
+## Environment Configuration
 
 ### 1. Backend (FastAPI)
 
 ```bash
-# Environnement virtuel
+# Virtual environment
 python -m venv .venv
 .venv\Scripts\activate  # Windows
 source .venv/bin/activate  # Linux/Mac
 
-# Dépendances
+# Dependencies
 pip install -r backend/requirements.txt
 ```
 
-### 2. Base de données PostgreSQL
+### 2. PostgreSQL Database
 
 ```sql
--- Créer la base de données
+-- Create the database
 CREATE DATABASE privpark;
 CREATE USER postgres WITH PASSWORD 'postgres';
 GRANT ALL PRIVILEGES ON DATABASE privpark TO postgres;
 ```
 
-### 3. Configuration Firebase
+### 3. Firebase Configuration
 
-1. Créer un projet Firebase
-2. Activer Authentication (Email/Phone/Google)
-3. Télécharger la clé de service Admin SDK
-4. Placer dans `backend/secrets/firebase_service_account.json`
+1. Create a Firebase project
+2. Enable Authentication (Email/Phone/Google)
+3. Download Admin SDK service key
+4. Place in `backend/secrets/firebase_service_account.json`
 
-### 4. Variables d'environnement
+### 4. Environment Variables
 
-Créer `backend/.env` :
+Create `backend/.env`:
 
 ```env
 ENV=dev
@@ -63,51 +63,51 @@ FIREBASE_CREDENTIALS_PATH=backend/secrets/firebase_service_account.json
 CORS_ORIGINS=*
 ```
 
-## Démarrage du serveur
+## Server Startup
 
 ```bash
-# Démarrer le serveur de développement
+# Start the development server
 python run_server.py
 
-# Ou directement avec uvicorn
+# Or directly with uvicorn
 uvicorn app.main:app --app-dir backend --reload --port 8000
 ```
 
-Le serveur sera disponible sur http://127.0.0.1:8000
+The server will be available at http://127.0.0.1:8000
 
 ## Tests
 
-### Tests d'authentification
+### Authentication Tests
 
 ```bash
-# Tests de base
+# Basic tests
 python backend/app/test/test_auth.py
 
-# Tests avec token Firebase
+# Tests with Firebase token
 python backend/app/test/test_auth.py YOUR_FIREBASE_TOKEN
 ```
 
-### Tests manuels avec cURL
+### Manual Tests with cURL
 
 ```bash
-# Test de santé
+# Health test
 curl http://127.0.0.1:8000/health
 
-# Test avec token
+# Test with token
 curl -H "Authorization: Bearer YOUR_TOKEN" \
      http://127.0.0.1:8000/api/users/me
 ```
 
-## Développement
+## Development
 
-### Ajout de nouveaux endpoints
+### Adding New Endpoints
 
-1. Créer la route dans `backend/app/api/routes_*.py`
-2. Ajouter les schémas dans `backend/app/schemas/`
-3. Ajouter les modèles DB si nécessaire
-4. Tester avec le script de test
+1. Create the route in `backend/app/api/routes_*.py`
+2. Add schemas in `backend/app/schemas/`
+3. Add DB models if necessary
+4. Test with the test script
 
-### Structure des routes
+### Route Structure
 
 ```python
 from fastapi import APIRouter, Depends
@@ -120,7 +120,7 @@ def get_items(current_user = Depends(verify_bearer_token_and_get_user)):
     return {"items": []}
 ```
 
-### Modèles de base de données
+### Database Models
 
 ```python
 # backend/app/db/models/example.py
@@ -134,7 +134,7 @@ class Example(Base):
     name = Column(String(255))
 ```
 
-### Schémas Pydantic
+### Pydantic Schemas
 
 ```python
 # backend/app/schemas/example.py
@@ -153,28 +153,28 @@ class ExampleOut(ExampleBase):
 
 ### Logs
 
-Les logs sont affichés dans la console du serveur.
+Logs are displayed in the server console.
 
-### Base de données
+### Database
 
 ```bash
-# Connexion à PostgreSQL
+# Connect to PostgreSQL
 psql -h localhost -U postgres -d privpark
 
-# Voir les tables
+# View tables
 \dt
 
-# Voir les utilisateurs
+# View users
 SELECT * FROM users;
 ```
 
 ### Firebase
 
-Vérifier les logs Firebase dans la console Firebase.
+Check Firebase logs in the Firebase console.
 
-## Déploiement
+## Deployment
 
-### Production avec Docker
+### Production with Docker
 
 ```dockerfile
 # Dockerfile
@@ -191,54 +191,53 @@ CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
 ```
 
 ```bash
-# Build et run
+# Build and run
 docker build -t heirsprivpark-api .
 docker run -p 8000:8000 heirsprivpark-api
 ```
 
-## Bonnes pratiques
+## Best Practices
 
 ### Code
 
-- Utiliser des types Python stricts
-- Documenter les fonctions avec docstrings
-- Suivre PEP 8
-- Tester avant de commiter
+- Use strict Python types
+- Document functions with docstrings
+- Follow PEP 8
+- Test before committing
 
-### Sécurité
+### Security
 
-- Ne jamais commiter les clés API
-- Utiliser des variables d'environnement
-- Valider toutes les entrées utilisateur
-- Implémenter rate limiting en production
+- Never commit API keys
+- Use environment variables
+- Validate all user inputs
+- Implement rate limiting in production
 
-### Base de données
+### Database
 
-- Utiliser des migrations Alembic
-- Créer des index sur les colonnes fréquemment utilisées
-- Faire des sauvegardes régulières
+- Use Alembic migrations
+- Create indexes on frequently used columns
+- Make regular backups
 
 ## Troubleshooting
 
-### Erreurs communes
+### Common Errors
 
-1. **Erreur de connexion PostgreSQL**
+1. **PostgreSQL Connection Error**
 
-   - Vérifier que PostgreSQL est démarré
-   - Vérifier les credentials dans `.env`
+   - Check that PostgreSQL is started
+   - Check credentials in `.env`
 
-2. **Erreur Firebase**
+2. **Firebase Error**
 
-   - Vérifier que le fichier de clé existe
-   - Vérifier le PROJECT_ID
+   - Check that the key file exists
+   - Check the PROJECT_ID
 
-3. **Erreur CORS**
-   - Vérifier la configuration CORS_ORIGINS
-   - Ajouter l'origine frontend
+3. **CORS Error**
+   - Check CORS_ORIGINS configuration
+   - Add frontend origin
 
 ### Support
 
-- Consulter les logs du serveur
-- Vérifier la documentation API
-- Créer une issue GitHub si nécessaire
-
+- Check server logs
+- Check API documentation
+- Create a GitHub issue if necessary

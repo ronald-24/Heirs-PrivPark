@@ -17,7 +17,7 @@ def create_active_reminder(
     end_time: datetime,
     reminder_interval_minutes: int = 30,
 ) -> ActiveReminder:
-    """Créer un rappel actif pour une réservation"""
+    """Create an active reminder for a booking"""
     active_reminder = ActiveReminder(
         user_id=user_id,
         booking_id=booking_id,
@@ -35,7 +35,7 @@ def get_active_reminders_for_booking(
     db: Session,
     booking_id: int
 ) -> Optional[ActiveReminder]:
-    """Récupérer le rappel actif pour une réservation"""
+    """Get the active reminder for a booking"""
     return db.execute(
         select(ActiveReminder).where(
             and_(
@@ -50,20 +50,20 @@ def get_active_reminders_ready_for_notification(
     db: Session,
     current_time: Optional[datetime] = None
 ) -> List[ActiveReminder]:
-    """Récupérer tous les rappels actifs prêts pour l'envoi de notification"""
+    """Get all active reminders ready for notification sending"""
     if current_time is None:
         current_time = datetime.utcnow()
 
-    # Récupérer les rappels actifs où :
-    # 1. La réservation est en cours (start_time <= current_time < end_time)
-    # 2. Il est temps d'envoyer un rappel (dernier rappel + intervalle <= current_time)
-    # 3. Le rappel est toujours actif
+    # Get active reminders where:
+    # 1. The booking is in progress (start_time <= current_time < end_time)
+    # 2. It's time to send a reminder (last reminder + interval <= current_time)
+    # 3. The reminder is still active
     query = select(ActiveReminder).where(
         and_(
             ActiveReminder.is_active == True,
             ActiveReminder.start_time <= current_time,
             ActiveReminder.end_time > current_time,
-            # Soit aucun rappel n'a été envoyé, soit le dernier rappel + intervalle <= maintenant
+            # Either no reminder has been sent, or last reminder + interval <= now
             (
                 ActiveReminder.last_reminder_sent.is_(None) |
                 (
@@ -81,7 +81,7 @@ def update_last_reminder_sent(
     db: Session,
     active_reminder_id: int
 ) -> Optional[ActiveReminder]:
-    """Mettre à jour la date du dernier rappel envoyé"""
+    """Update the date of the last reminder sent"""
     active_reminder = db.execute(
         select(ActiveReminder).where(ActiveReminder.id == active_reminder_id)
     ).scalar_one_or_none()
@@ -101,7 +101,7 @@ def deactivate_reminder(
     db: Session,
     booking_id: int
 ) -> bool:
-    """Désactiver un rappel pour une réservation"""
+    """Deactivate a reminder for a booking"""
     active_reminder = get_active_reminders_for_booking(db, booking_id)
     if not active_reminder:
         return False
@@ -114,10 +114,10 @@ def deactivate_reminder(
 
 
 def cleanup_expired_reminders(db: Session) -> int:
-    """Nettoyer les rappels expirés (réservations terminées)"""
+    """Clean up expired reminders (completed bookings)"""
     current_time = datetime.utcnow()
 
-    # Désactiver tous les rappels où la réservation est terminée
+    # Deactivate all reminders where the booking is finished
     expired_reminders = db.execute(
         select(ActiveReminder).where(
             and_(
@@ -142,7 +142,7 @@ def get_user_active_reminders(
     db: Session,
     user_id: int
 ) -> List[ActiveReminder]:
-    """Récupérer tous les rappels actifs d'un utilisateur"""
+    """Get all active reminders for a user"""
     return db.execute(
         select(ActiveReminder).where(
             and_(

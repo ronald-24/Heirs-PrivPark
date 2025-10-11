@@ -1,77 +1,77 @@
 # Heirs-PrivPark 🅿️
 
-**Application mobile de location de places de parking privées**
+**Mobile application for private parking space rental**
 
-Une plateforme connectant les propriétaires de places de parking avec les utilisateurs cherchant un stationnement sûr et abordable.
+A platform connecting parking space owners with users looking for safe and affordable parking.
 
 ## 🎯 Mission
 
-Fournir une solution de stationnement pratique, abordable et sécurisée en connectant les propriétaires de places privées avec les utilisateurs en recherche de parking.
+Provide a practical, affordable and secure parking solution by connecting private space owners with users looking for parking.
 
 ## 🏗️ Architecture
 
 ### Frontend (Mobile)
 
 - **Framework**: Flutter
-- **Authentification**: Firebase Authentication
+- **Authentication**: Firebase Authentication
 - **Maps**: Google Maps API
-- **Paiements**: Stripe Integration
+- **Payments**: Stripe Integration
 
 ### Backend (API)
 
 - **Framework**: FastAPI (Python)
-- **Base de données**: PostgreSQL
-- **Authentification**: Firebase Admin SDK
-- **Stockage**: AWS S3 (photos)
+- **Database**: PostgreSQL
+- **Authentication**: Firebase Admin SDK
+- **Storage**: AWS S3 (photos)
 - **Notifications**: Firebase Cloud Messaging
 
-## 🚀 Fonctionnalités MVP
+## 🚀 MVP Features
 
-### ✅ Phase 1 - Authentification (TERMINÉE)
+### ✅ Phase 1 - Authentication (COMPLETED)
 
-- [x] Inscription/Connexion (Firebase Auth)
-- [x] Profils utilisateurs
-- [x] Vérification des tokens
-- [x] Gestion des rôles (utilisateur/admin)
+- [x] Registration/Login (Firebase Auth)
+- [x] User profiles
+- [x] Token verification
+- [x] Role management (user/admin)
 
-### 🔄 Phase 2 - Gestion des parkings (EN COURS)
+### 🔄 Phase 2 - Parking Management (IN PROGRESS)
 
-- [ ] Ajout/Modification de places
-- [ ] Photos et descriptions
-- [ ] Calendrier de disponibilité
-- [ ] Géolocalisation
+- [ ] Add/Modify spaces
+- [ ] Photos and descriptions
+- [ ] Availability calendar
+- [ ] Geolocation
 
-### 📋 Phase 3 - Recherche et réservation
+### 📋 Phase 3 - Search and Booking
 
-- [ ] Recherche par localisation
-- [ ] Filtres (prix, date, disponibilité)
-- [ ] Réservation en temps réel
-- [ ] Navigation GPS
+- [ ] Search by location
+- [ ] Filters (price, date, availability)
+- [ ] Real-time booking
+- [ ] GPS navigation
 
-### 💳 Phase 4 - Paiements
+### 💳 Phase 4 - Payments
 
-- [ ] Intégration Stripe
-- [ ] Paiements sécurisés
-- [ ] Reçus numériques
-- [ ] Historique des transactions
+- [ ] Stripe integration
+- [ ] Secure payments
+- [ ] Digital receipts
+- [ ] Transaction history
 
 ### 🔔 Phase 5 - Notifications
 
-- [ ] Confirmations de réservation
-- [ ] Rappels de paiement
-- [ ] Notifications push
-- [ ] Gestion des disputes
+- [ ] Booking confirmations
+- [ ] Payment reminders
+- [ ] Push notifications
+- [ ] Dispute management
 
 ### 👨‍💼 Phase 6 - Administration
 
-- [ ] Panel admin
-- [ ] Gestion des utilisateurs
-- [ ] Modération des annonces
-- [ ] Support client
+- [ ] Admin panel
+- [ ] User management
+- [ ] Listing moderation
+- [ ] Customer support
 
-## 🛠️ Installation & Démarrage
+## 🛠️ Installation & Setup
 
-### Prérequis
+### Prerequisites
 
 - Python 3.11+
 - PostgreSQL 14+
@@ -81,23 +81,23 @@ Fournir une solution de stationnement pratique, abordable et sécurisée en conn
 ### Backend (FastAPI)
 
 ```bash
-# Cloner le projet
+# Clone the project
 git clone <repository-url>
 cd Heirs-PrivPark
 
-# Environnement virtuel
+# Virtual environment
 python -m venv .venv
 .venv\Scripts\activate  # Windows
 source .venv/bin/activate  # Linux/Mac
 
-# Dépendances
+# Dependencies
 pip install -r backend/requirements.txt
 
 # Configuration
 cp backend/env.example backend/.env
-# Éditer backend/.env avec vos clés Firebase
+# Edit backend/.env with your Firebase keys
 
-# Démarrer le serveur
+# Start the server
 python run_server.py
 ```
 
@@ -111,35 +111,35 @@ flutter run
 
 ## 📡 API Endpoints
 
-### Authentification
+### Authentication
 
-- `POST /api/auth/verify-token` - Vérifier token Firebase
-- `POST /api/auth/login` - Connexion utilisateur
-- `POST /api/auth/logout` - Déconnexion
-- `GET /api/auth/me` - Profil utilisateur
+- `POST /api/auth/verify-token` - Verify Firebase token
+- `POST /api/auth/login` - User login
+- `POST /api/auth/logout` - Logout
+- `GET /api/auth/me` - User profile
 
-### Utilisateurs
+### Users
 
-- `GET /api/users/me` - Profil détaillé
-- `PUT /api/users/me` - Modifier profil
+- `GET /api/users/me` - Detailed profile
+- `PUT /api/users/me` - Update profile
 
-### Santé
+### Health
 
-- `GET /health` - Statut de l'API
+- `GET /health` - API status
 
 ## 🧪 Tests
 
 ```bash
-# Tests d'authentification
+# Authentication tests
 python backend/app/test/test_auth.py
 
-# Tests avec token Firebase
+# Tests with Firebase token
 python backend/app/test/test_auth.py YOUR_FIREBASE_TOKEN
 ```
 
 ## 🔧 Configuration
 
-### Variables d'environnement (backend/.env)
+### Environment variables (backend/.env)
 
 ```env
 ENV=dev
@@ -153,14 +153,14 @@ CORS_ORIGINS=*
 
 ### Firebase Setup
 
-1. Créer projet Firebase
-2. Activer Authentication (Email/Phone/Google)
-3. Télécharger clé de service Admin SDK
-4. Placer dans `backend/secrets/`
+1. Create Firebase project
+2. Enable Authentication (Email/Phone/Google)
+3. Download Admin SDK service key
+4. Place in `backend/secrets/`
 
-## 📊 Base de données
+## 📊 Database
 
-### Modèle User
+### User Model
 
 - `id` (Primary Key)
 - `firebase_uid` (Unique)
